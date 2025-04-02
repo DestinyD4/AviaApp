@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}Создать новую запись{% endblock %}
+
+{% block content %}
+<div class="ml-64 p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Заголовок -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Создание новой записи</h1>
+
+        <form method="POST" class="space-y-8">
+            <!-- Секция: Инфо авианакладной -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Номер авианакладной</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Код авиакомпании</label>
+                        <input type="text" name="airline_code"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Номер AWB</label>
+                        <input type="text" name="awb_number"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция: Отправитель -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Отправитель</h2>
+                <div class="space-y-4">
+                    {% for i in range(1,5) %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Line {{ i }}</label>
+                        <input type="text" name="shipper_line{{ i }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Секция: Получатель -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Получатель</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for i in range(1,5) %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Line {{ i }}</label>
+                        <input type="text" name="recipient_line{{ i }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Секция: Описание груза -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Описание груза</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for i in range(1,4) %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Описание Line {{ i }}</label>
+                        <input type="text" name="cargo_description_line{{ i }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    {% endfor %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Количество мест</label>
+                        <input type="number" name="places_count"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Вес брутто (кг)</label>
+                        <input type="number" step="0.01" name="weight_brutto"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Объем (м³)</label>
+                        <input type="number" step="0.01" name="volume"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция: Маршрут -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Маршрут</h2>
+                <div class="space-y-4">
+                    {% for i in range(1,4) %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Этап {{ i }} (to)</label>
+                            <input type="text" name="route{{ i }}_to"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">(by)</label>
+                            <input type="text" name="route{{ i }}_by"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Секция: Прочие поля -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Общая информация</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Агент (строка 1)</label>
+                        <input type="text" name="agent_line1"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Агент (строка 2)</label>
+                        <input type="text" name="agent_line2"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="mt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Агент (строка 3)</label>
+                        <input type="text" name="agent_line3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Код агента</label>
+                        <input type="text" name="agent_code"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Аэропорт отправления</label>
+                        <input type="text" name="airport_departure"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Аэропорт назначения</label>
+                        <input type="text" name="airport_arrival"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Номер бронирования</label>
+                        <input type="text" name="booking"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Дата оформления</label>
+                        <input type="text" name="date_issued"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Место оформления</label>
+                        <input type="text" name="place_issued"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Подпись</label>
+                        <input type="text" name="signature"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Секция: Оплата -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Оплата</h2>
+                <div class="space-y-4">
+                    {% for i in range(1,4) %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Оплата Line {{ i }}</label>
+                        <input type="text" name="payment_line{{ i }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Секция: Таможенная информация -->
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Таможенная информация</h2>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Особые отметки</label>
+                    <textarea name="special_customs_info" rows="3"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+            </div>
+
+            <!-- Кнопка отправки -->
+            <div class="mt-8">
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium transition-colors flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                    Сохранить запись
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

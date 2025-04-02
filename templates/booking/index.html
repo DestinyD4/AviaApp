@@ -1,0 +1,252 @@
+{% extends "base.html" %}
+{% block title %}Букинг (Просмотр) - Фильтрация и Предпросмотр PDF{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Букинг (только просмотр)</h1>
+
+    <!-- Форма фильтра -->
+    <form method="GET" action="{{ url_for('booking.index') }}"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+        <h3 class="text-xl font-semibold text-gray-700 mb-6">Фильтр / Поиск</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {% macro filter_input(label, name, value) %}
+            <div class="space-y-1">
+                <label class="block text-sm font-medium text-gray-600">{{ label }}</label>
+                <input type="text" id="{{ name }}" name="{{ name }}" value="{{ value }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition-all">
+            </div>
+            {% endmacro %}
+
+            {{ filter_input("Аэропорт отправления", "airport", filter_vals.airport) }}
+            {{ filter_input("AWB", "awb", filter_vals.awb) }}
+            {{ filter_input("Направление", "route", filter_vals.route) }}
+            {{ filter_input("Дата", "date_issued", filter_vals.date_issued) }}
+            {{ filter_input("Тип груза", "cargo_type", filter_vals.cargo_type) }}
+            {{ filter_input("Получатель", "recipient", filter_vals.recipient) }}
+
+            <div class="lg:col-span-2">
+                <label class="block text-sm font-medium text-gray-600 mb-1">Общий поиск</label>
+                <input type="text" id="search" name="search" placeholder="Поиск по всем полям"
+                    value="{{ filter_vals.search }}"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-400 transition-all">
+            </div>
+        </div>
+
+        <div class="mt-6 flex gap-3">
+            <button type="submit"
+                class="bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Применить фильтры
+            </button>
+            <a href="{{ url_for('booking.index') }}"
+                class="bg-gray-100 text-gray-600 px-5 py-2.5 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Сбросить
+            </a>
+        </div>
+    </form>
+
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Левая колонка с карточками -->
+        <div class="flex-1 space-y-5">
+            {% for c in cargo_list %}
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <!-- Шапка карточки -->
+                <div class="flex flex-wrap items-start justify-between p-5 gap-4 border-b border-gray-100">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-500">Аэропорт:</span>
+                            <span class="text-sm text-gray-800">{{ c.airport_departure or '—' }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-500">AWB:</span>
+                            <span class="text-sm text-gray-800 font-mono">
+                                {% if c.airline_code or c.awb_number %}
+                                {{ c.airline_code or '' }}-{{ c.awb_number or '' }}
+                                {% else %}—{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-500">Дата:</span>
+                            <span class="text-sm text-gray-800">{{ c.date_issued or '—' }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-medium text-gray-500">Груз:</span>
+                            <span class="text-sm text-gray-800">{{ c.cargo_description_line1|default('', true)|truncate(30) or '—' }}
+
+
+</span>
+                        </div>
+                    </div>
+
+                    <button
+                        class="ml-auto flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                        id="btn-toggle-{{ c.id }}" onclick="toggleDetails({{ c.id }})">
+                        <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        Подробности
+                    </button>
+                </div>
+
+                <!-- Детали карточки -->
+                <div class="hidden p-5 bg-gray-50" id="details-{{ c.id }}">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Отправитель/Получатель -->
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded-lg border border-gray-100">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Отправитель
+                                </h4>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    {{ [c.shipper_line1, c.shipper_line2, c.shipper_line3,
+                                    c.shipper_line4]|select|join('<br>')|safe }}
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-lg border border-gray-100">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Получатель
+                                </h4>
+                                <div class="text-sm text-gray-600 space-y-1">
+                                    {{ [c.recipient_line1, c.recipient_line2, c.recipient_line3,
+                                    c.recipient_line4]|select|join('<br>')|safe }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Информация о грузе -->
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded-lg border border-gray-100">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                                    Характеристики груза</h4>
+                                <div class="grid grid-cols-2 gap-3 text-sm">
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100">
+                                        <span class="text-gray-500">Кол-во мест:</span>
+                                        <span class="text-gray-700 font-medium">{{ c.places_count or '—' }}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100">
+                                        <span class="text-gray-500">Вес брутто:</span>
+                                        <span class="text-gray-700 font-medium">{{ c.weight_brutto or '—' }} кг</span>
+                                    </div>
+                                    <div class="flex items-center justify-between py-1 border-b border-gray-100">
+                                        <span class="text-gray-500">Объем:</span>
+                                        <span class="text-gray-700 font-medium">{{ c.volume or '—' }} м³</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-lg border border-gray-100">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">Маршрут
+                                </h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-center gap-2 text-gray-600">
+                                        <span class="w-5 text-gray-400">1.</span>
+                                        {{ c.route1_to or '—' }} <span class="text-gray-400 ml-2">({{ c.route1_by or '—'
+                                            }})</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-600">
+                                        <span class="w-5 text-gray-400">2.</span>
+                                        {{ c.route2_to or '—' }} <span class="text-gray-400 ml-2">({{ c.route2_by or '—'
+                                            }})</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-600">
+                                        <span class="w-5 text-gray-400">3.</span>
+                                        {{ c.route3_to or '—' }} <span class="text-gray-400 ml-2">({{ c.route3_by or '—'
+                                            }})</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопка генерации PDF -->
+                        <div class="md:col-span-2">
+                            <button onclick="showPdfInIframe({{ c.id }})"
+                                class="w-full bg-green-100 text-green-700 px-4 py-3 rounded-lg hover:bg-green-200 transition-colors font-medium flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Сгенерировать PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Правая колонка PDF (изначально скрыта) -->
+        <div id="rightColumn"
+            class="hidden lg:w-1/2 bg-white border border-gray-200 rounded-xl shadow-sm p-4 h-[calc(100vh-180px)] lg:sticky lg:top-4">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">Предпросмотр документа</h3>
+                <button onclick="hidePreview()"
+                    class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <button onclick="printIframe()"
+                class="w-full mb-4 bg-indigo-100 text-indigo-700 px-4 py-3 rounded-lg hover:bg-indigo-200 transition-colors font-medium flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Печать документа
+            </button>
+            <div class="flex-1 h-full rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                <iframe id="pdfIframe" class="w-full h-full min-h-[500px]"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Раскрытие/скрытие деталей карточки
+    function toggleDetails(id) {
+        const detailsEl = document.getElementById(`details-${id}`);
+        const btnEl = document.getElementById(`btn-toggle-${id}`);
+        const icon = btnEl.querySelector('svg');
+
+        detailsEl.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+        btnEl.textContent = detailsEl.classList.contains('hidden') ? 'Подробности' : 'Скрыть';
+    }
+
+    // Показ PDF в правой колонке
+    function showPdfInIframe(cargoId) {
+        const rightCol = document.getElementById('rightColumn');
+        rightCol.classList.remove('hidden');
+        document.getElementById('pdfIframe').src = `/booking/${cargoId}/pdf`;
+    }
+
+    // Печать PDF
+    function printIframe() {
+        const iframe = document.getElementById('pdfIframe');
+        if (!iframe.src) {
+            alert('Пожалуйста, сначала откройте документ');
+            return;
+        }
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    }
+
+    // Скрытие правой колонки
+    function hidePreview() {
+        const rightCol = document.getElementById('rightColumn');
+        rightCol.classList.add('hidden');
+        document.getElementById('pdfIframe').src = '';
+    }
+</script>
+{% endblock %}

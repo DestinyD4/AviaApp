@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% block title %}Редактировать запись #{{ cargo.id }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Редактировать запись #{{ cargo.id }}</h1>
+
+    <form method="POST" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <!-- AWB Info -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Номер авианакладной</legend>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Код авиакомпании</label>
+                    <input type="text" name="airline_code" value="{{ cargo.airline_code }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Номер AWB</label>
+                    <input type="text" name="awb_number" value="{{ cargo.awb_number }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Отправитель -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Отправитель</legend>
+
+            <div class="space-y-4">
+                {% for i in range(1,5) %}
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">
+                        {{ ['Название / ФИО', 'Адрес', 'Адрес', 'Телефон / Др. инфо'][i-1] }} (Line {{ i }})
+                    </label>
+                    <input type="text" name="shipper_line{{ i }}" value="{{ cargo['shipper_line' ~ i] }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Получатель -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Получатель</legend>
+
+            <div class="space-y-4">
+                {% for i in range(1,5) %}
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">
+                        {{ ['Город', 'ФИО', 'Код/ID', 'Адрес'][i-1] }} (Line {{ i }})
+                    </label>
+                    <input type="text" name="recipient_line{{ i }}" value="{{ cargo['recipient_line' ~ i] }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Груз -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Описание груза</legend>
+
+            <div class="space-y-4">
+                {% for i in range(1,4) %}
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Описание (Line {{ i }})</label>
+                    <input type="text" name="cargo_description_line{{ i }}"
+                        value="{{ cargo['cargo_description_line' ~ i] }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                {% endfor %}
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Количество мест</label>
+                        <input type="number" name="places_count" value="{{ cargo.places_count }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Вес брутто (кг)</label>
+                        <input type="number" step="0.01" name="weight_brutto" value="{{ cargo.weight_brutto }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Объем (м³)</label>
+                        <input type="number" step="0.01" name="volume" value="{{ cargo.volume }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Маршрут -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Маршрут (куда – кем)</legend>
+
+            <div class="space-y-4">
+                {% for i in range(1,4) %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Маршрут {{ i }} (to)</label>
+                        <input type="text" name="route{{ i }}_to" value="{{ cargo['route' ~ i ~ '_to'] }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">(by)</label>
+                        <input type="text" name="route{{ i }}_by" value="{{ cargo['route' ~ i ~ '_by'] }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Прочие поля -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Прочая информация</legend>
+
+            <div class="space-y-4">
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Агент (строка 1)</label>
+                    <input type="text" name="agent_line1" value="{{ cargo.agent_line1 or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Агент (строка 2)</label>
+                    <input type="text" name="agent_line2" value="{{ cargo.agent_line2 or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Агент (строка 3)</label>
+                    <input type="text" name="agent_line3" value="{{ cargo.agent_line3 or '' }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Код агента</label>
+                        <input type="text" name="agent_code" value="{{ cargo.agent_code }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Номер бронирования</label>
+                        <input type="text" name="booking" value="{{ cargo.booking }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Аэропорт отправления</label>
+                        <input type="text" name="airport_departure" value="{{ cargo.airport_departure }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Аэропорт назначения</label>
+                        <input type="text" name="airport_arrival" value="{{ cargo.airport_arrival }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Дата оформления</label>
+                        <input type="text" name="date_issued" value="{{ cargo.date_issued }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Место оформления</label>
+                        <input type="text" name="place_issued" value="{{ cargo.place_issued }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-600">Подпись</label>
+                        <input type="text" name="signature" value="{{ cargo.signature }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Оплата -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Оплата</legend>
+
+            <div class="space-y-4">
+                {% for i in range(1,4) %}
+                <div class="space-y-2">
+                    <label class="block text-sm font-medium text-gray-600">Оплата (Line {{ i }})</label>
+                    <input type="text" name="payment_line{{ i }}" value="{{ cargo['payment_line' ~ i] }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <!-- Таможенная информация -->
+        <fieldset class="mb-8 p-4 border border-gray-200 rounded-lg">
+            <legend class="px-2 text-lg font-semibold text-gray-700">Таможенная информация</legend>
+
+            <div class="space-y-2">
+                <label class="block text-sm font-medium text-gray-600">Специальная информация</label>
+                <textarea name="special_customs_info" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-300">{{ cargo.special_customs_info }}</textarea>
+            </div>
+        </fieldset>
+
+        <div class="mt-8">
+            <button type="submit"
+                class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                Сохранить изменения
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

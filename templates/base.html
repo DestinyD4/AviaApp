@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Моё приложение{% endblock %}</title>
+
+    <!-- Подключение Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Дополнительные стили для блюпринтов -->
+    {% block styles %}{% endblock %}
+</head>
+
+<body class="h-full bg-gray-50">
+    <!-- Боковая панель -->
+    <nav class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg">
+        <div class="p-4">
+            <h2 class="text-xl font-bold text-gray-800 mb-6">Меню</h2>
+            <ul class="space-y-2">
+                <li>
+                    <a href="{{ url_for('main.index') }}"
+                        class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50 transition-colors">
+                        <span class="ml-3">Главная</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('booking.index') }}"
+                        class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50 transition-colors">
+                        <span class="ml-3">Букинг</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('table.index') }}"
+                        class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-blue-50 transition-colors">
+                        <span class="ml-3">Таблица (CRUD)</span>
+                    </a>
+                </li>
+                {% if current_user.is_admin %}
+                <li>
+                    <a href="{{ url_for('admin.admin_panel') }}"
+                        class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-yellow-50 transition-colors">
+                        <span class="ml-3">Админка</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="mt-8 border-t pt-4">
+                    <a href="{{ url_for('auth.logout') }}"
+                        class="flex items-center p-2 text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                        <span class="ml-3">Выйти</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="ml-64 p-8 min-h-full">
+        <!-- Flash-сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="space-y-4 mb-6">
+            {% for category, message in messages %}
+            <div class="p-4 rounded-lg {{ 'bg-green-100' if category == 'success' else 'bg-red-100' }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Скрипты -->
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
